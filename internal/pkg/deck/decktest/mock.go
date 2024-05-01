@@ -4,7 +4,6 @@
 package decktest
 
 import (
-	"github.com/google/uuid"
 	"github.com/ramonmedeiros/deck/internal/pkg/deck"
 	"sync"
 )
@@ -15,11 +14,11 @@ import (
 //
 //		// make and configure a mocked deck.Manager
 //		mockedManager := &ManagerMock{
+//			GetFunc: func(deckID string) (*deck.Deck, error) {
+//				panic("mock out the Get method")
+//			},
 //			NewDeckFunc: func(shuffled bool, cards ...string) (*deck.Deck, error) {
 //				panic("mock out the NewDeck method")
-//			},
-//			OpenFunc: func(deckID uuid.UUID) (*deck.Deck, error) {
-//				panic("mock out the Open method")
 //			},
 //		}
 //
@@ -28,14 +27,19 @@ import (
 //
 //	}
 type ManagerMock struct {
+	// GetFunc mocks the Get method.
+	GetFunc func(deckID string) (*deck.Deck, error)
+
 	// NewDeckFunc mocks the NewDeck method.
 	NewDeckFunc func(shuffled bool, cards ...string) (*deck.Deck, error)
 
-	// OpenFunc mocks the Open method.
-	OpenFunc func(deckID uuid.UUID) (*deck.Deck, error)
-
 	// calls tracks calls to the methods.
 	calls struct {
+		// Get holds details about calls to the Get method.
+		Get []struct {
+			// DeckID is the deckID argument value.
+			DeckID string
+		}
 		// NewDeck holds details about calls to the NewDeck method.
 		NewDeck []struct {
 			// Shuffled is the shuffled argument value.
@@ -43,14 +47,45 @@ type ManagerMock struct {
 			// Cards is the cards argument value.
 			Cards []string
 		}
-		// Open holds details about calls to the Open method.
-		Open []struct {
-			// DeckID is the deckID argument value.
-			DeckID uuid.UUID
-		}
 	}
+	lockGet     sync.RWMutex
 	lockNewDeck sync.RWMutex
-	lockOpen    sync.RWMutex
+}
+
+// Get calls GetFunc.
+func (mock *ManagerMock) Get(deckID string) (*deck.Deck, error) {
+	callInfo := struct {
+		DeckID string
+	}{
+		DeckID: deckID,
+	}
+	mock.lockGet.Lock()
+	mock.calls.Get = append(mock.calls.Get, callInfo)
+	mock.lockGet.Unlock()
+	if mock.GetFunc == nil {
+		var (
+			deckOut *deck.Deck
+			errOut  error
+		)
+		return deckOut, errOut
+	}
+	return mock.GetFunc(deckID)
+}
+
+// GetCalls gets all the calls that were made to Get.
+// Check the length with:
+//
+//	len(mockedManager.GetCalls())
+func (mock *ManagerMock) GetCalls() []struct {
+	DeckID string
+} {
+	var calls []struct {
+		DeckID string
+	}
+	mock.lockGet.RLock()
+	calls = mock.calls.Get
+	mock.lockGet.RUnlock()
+	return calls
 }
 
 // NewDeck calls NewDeckFunc.
@@ -90,41 +125,5 @@ func (mock *ManagerMock) NewDeckCalls() []struct {
 	mock.lockNewDeck.RLock()
 	calls = mock.calls.NewDeck
 	mock.lockNewDeck.RUnlock()
-	return calls
-}
-
-// Open calls OpenFunc.
-func (mock *ManagerMock) Open(deckID uuid.UUID) (*deck.Deck, error) {
-	callInfo := struct {
-		DeckID uuid.UUID
-	}{
-		DeckID: deckID,
-	}
-	mock.lockOpen.Lock()
-	mock.calls.Open = append(mock.calls.Open, callInfo)
-	mock.lockOpen.Unlock()
-	if mock.OpenFunc == nil {
-		var (
-			deckOut *deck.Deck
-			errOut  error
-		)
-		return deckOut, errOut
-	}
-	return mock.OpenFunc(deckID)
-}
-
-// OpenCalls gets all the calls that were made to Open.
-// Check the length with:
-//
-//	len(mockedManager.OpenCalls())
-func (mock *ManagerMock) OpenCalls() []struct {
-	DeckID uuid.UUID
-} {
-	var calls []struct {
-		DeckID uuid.UUID
-	}
-	mock.lockOpen.RLock()
-	calls = mock.calls.Open
-	mock.lockOpen.RUnlock()
 	return calls
 }

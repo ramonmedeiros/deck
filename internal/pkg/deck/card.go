@@ -6,66 +6,6 @@ import (
 	"strings"
 )
 
-type Suit int
-
-const (
-	suitSize int = 4
-
-	SPADES Suit = iota
-	DIAMONDS
-	CLUBS
-	HEARTS
-)
-
-var (
-	codeToSuit = map[string]Suit{
-		"S": SPADES,
-		"D": DIAMONDS,
-		"C": CLUBS,
-		"H": HEARTS,
-	}
-)
-
-type Rank int
-
-const (
-	rankSize int = 13
-
-	ACE Rank = iota
-	ONE
-	TWO
-	THREE
-	FOUR
-	FIVE
-	SIX
-	SEVEN
-	EIGHT
-	NINE
-	TEN
-	JACK
-	QUEEN
-	KING
-)
-
-var (
-	codeToRank = map[string]Rank{
-		"A":  ACE,
-		"1":  ONE,
-		"2":  TWO,
-		"3":  THREE,
-		"4":  FOUR,
-		"5":  FIVE,
-		"6":  SIX,
-		"7":  SEVEN,
-		"8":  EIGHT,
-		"9":  NINE,
-		"10": TEN,
-		"J":  JACK,
-		"Q":  QUEEN,
-		"K":  KING,
-	}
-)
-
 type Card struct {
 	suit Suit
 	rank Rank
@@ -110,4 +50,16 @@ func NewCard(suit Suit, rank Rank) (*Card, error) {
 		suit: suit,
 		rank: rank,
 	}, nil
+}
+
+func (c *Card) Value() string {
+	return c.rank.String()
+}
+
+func (c *Card) Suit() string {
+	return c.suit.String()
+}
+
+func (c *Card) Code() string {
+	return c.rank.Code() + c.suit.Code()
 }

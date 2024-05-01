@@ -1,6 +1,7 @@
 package deck
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 
@@ -11,9 +12,11 @@ type DeckManager struct {
 	decks map[uuid.UUID]*Deck
 }
 
+var ErrNotFound = errors.New("could not find deck")
+
 //go:generate moq -pkg decktest -skip-ensure -stub -out decktest/mock.go . Manager:ManagerMock
 type Manager interface {
-	Open(deckID uuid.UUID) (*Deck, error)
+	Get(deckID string) (*Deck, error)
 	NewDeck(shuffled bool, cards ...string) (*Deck, error)
 }
 
@@ -24,10 +27,16 @@ func NewManager() *DeckManager {
 	}
 }
 
-func (m *DeckManager) Open(deckID uuid.UUID) (*Deck, error) {
-	deck, found := m.decks[deckID]
+// Get returns deck for a given ID
+func (m *DeckManager) Get(deckID string) (*Deck, error) {
+	deckUUID, err := uuid.Parse(deckID)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse id %s: %w", deckUUID.String(), err)
+	}
+
+	deck, found := m.decks[deckUUID]
 	if !found {
-		return nil, fmt.Errorf("could not found deck by id: %s", deckID.String())
+		return nil, ErrNotFound
 	}
 	return deck, nil
 }

@@ -22,15 +22,6 @@ const (
 	Cards   = "cards"
 )
 
-func (s *Server) setupEndpoint() {
-	s.router.POST("/deck", s.newDeck)
-
-	deckEndpoint := s.router.Group("/deck")
-
-	deckEndpoint.GET("/:"+DeckID, s.openDeck)
-	deckEndpoint.GET("/:"+DeckID+"/draw", s.drawCard)
-}
-
 func (s *Server) newDeck(c *gin.Context) {
 	params := c.Request.URL.Query()
 
@@ -60,10 +51,4 @@ func (s *Server) newDeck(c *gin.Context) {
 			Remaining: newDeck.Remaining(),
 			Shuffled:  newDeck.Shuffled(),
 		})
-}
-
-func (s *Server) openDeck(c *gin.Context) {
-}
-
-func (s *Server) drawCard(c *gin.Context) {
 }

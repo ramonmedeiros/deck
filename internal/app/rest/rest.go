@@ -41,3 +41,12 @@ func (s *Server) setupConfig(r *gin.Engine) {
 	config.AllowAllOrigins = true
 	r.Use(cors.New(config))
 }
+
+func (s *Server) setupEndpoint() {
+	s.router.POST("/deck", s.newDeck)
+
+	deckEndpoint := s.router.Group("/deck")
+
+	deckEndpoint.GET("/:"+DeckID, s.openDeck)
+	deckEndpoint.GET("/:"+DeckID+"/draw", s.drawCard)
+}
