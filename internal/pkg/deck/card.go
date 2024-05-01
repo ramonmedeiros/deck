@@ -5,8 +5,9 @@ import "errors"
 type Suit int
 
 const (
-	suitSize int  = 4
-	SPADES   Suit = iota + 1
+	suitSize int = 4
+
+	SPADES Suit = iota + 1
 	DIAMONDS
 	CLUBS
 	HEARTS
@@ -38,6 +39,7 @@ type Card struct {
 	rank Rank
 }
 
+// NewCard returns a new card given suit and rank
 func NewCard(suit Suit, rank Rank) (*Card, error) {
 	if int(suit) < 0 || int(suit) > suitSize {
 		return nil, errors.New("suit does not exist")
