@@ -6,7 +6,6 @@ const (
 	rankSize int = 13
 
 	ACE Rank = iota
-	ONE
 	TWO
 	THREE
 	FOUR
@@ -24,7 +23,6 @@ const (
 var (
 	codeToRank = map[string]Rank{
 		"A":  ACE,
-		"1":  ONE,
 		"2":  TWO,
 		"3":  THREE,
 		"4":  FOUR,
@@ -43,7 +41,6 @@ var (
 func (r *Rank) String() string {
 	return map[Rank]string{
 		ACE:   "ACE",
-		ONE:   "1",
 		TWO:   "2",
 		THREE: "3",
 		FOUR:  "4",
@@ -62,7 +59,6 @@ func (r *Rank) String() string {
 func (r *Rank) Code() string {
 	return map[Rank]string{
 		ACE:   "A",
-		ONE:   "1",
 		TWO:   "2",
 		THREE: "3",
 		FOUR:  "4",
