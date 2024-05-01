@@ -3,12 +3,15 @@ package deck
 import (
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
 func TestDeckGenerationSize(t *testing.T) {
 	newDeck, err := NewDeck(false)
 	require.NoError(t, err)
+	require.NotNil(t, newDeck.ID)
+	require.NoError(t, uuid.Validate(newDeck.ID.String()))
 
 	cards := newDeck.Open()
 	require.Len(t, cards, 52)

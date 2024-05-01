@@ -2,16 +2,23 @@ package deck
 
 import (
 	"math/rand"
+
+	"github.com/google/uuid"
 )
 
 type Deck struct {
+	ID       uuid.UUID
 	cards    []*Card
 	shuffled bool
 }
 
 // NewDeck generates a new deck with all cars, or respecting the parameters
 func NewDeck(shuffled bool, cards ...string) (*Deck, error) {
-	d := Deck{shuffled: shuffled}
+
+	d := Deck{
+		ID:       uuid.New(),
+		shuffled: shuffled,
+	}
 
 	for s := 1; s <= suitSize; s++ {
 		for r := 1; r <= rankSize; r++ {
