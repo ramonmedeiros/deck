@@ -1,6 +1,10 @@
 package deck
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+	"strings"
+)
 
 type Suit int
 
@@ -11,6 +15,15 @@ const (
 	DIAMONDS
 	CLUBS
 	HEARTS
+)
+
+var (
+	codeToSuit = map[string]Suit{
+		"S": SPADES,
+		"D": DIAMONDS,
+		"C": CLUBS,
+		"H": HEARTS,
+	}
 )
 
 type Rank int
@@ -34,9 +47,53 @@ const (
 	KING
 )
 
+var (
+	codeToRank = map[string]Rank{
+		"A":  ACE,
+		"1":  ONE,
+		"2":  TWO,
+		"3":  THREE,
+		"4":  FOUR,
+		"5":  FIVE,
+		"6":  SIX,
+		"7":  SEVEN,
+		"8":  EIGHT,
+		"9":  NINE,
+		"10": TEN,
+		"J":  JACK,
+		"Q":  QUEEN,
+		"K":  KING,
+	}
+)
+
 type Card struct {
 	suit Suit
 	rank Rank
+}
+
+// CodeToCard parses code and return correspondent card
+func CodeToCard(code string) (*Card, error) {
+	codeLength := len(code)
+	if codeLength < 2 || codeLength > 3 {
+		return nil, errors.New("code does not meet length requirements")
+	}
+
+	rankCode := code[:codeLength-1]
+	rank, found := codeToRank[strings.ToUpper(rankCode)]
+	if !found {
+		return nil, fmt.Errorf("rank code not recognized: %s", rankCode)
+	}
+
+	suitCode := code[codeLength-1:]
+	suit, found := codeToSuit[strings.ToUpper(suitCode)]
+	if !found {
+		return nil, fmt.Errorf("suit code not recognized: %s", suitCode)
+	}
+
+	return &Card{
+		rank: rank,
+		suit: suit,
+	}, nil
 }
 
 // NewCard returns a new card given suit and rank

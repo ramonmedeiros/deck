@@ -20,10 +20,20 @@ func NewDeck(shuffled bool, cards ...string) (*Deck, error) {
 		shuffled: shuffled,
 	}
 
-	for s := 1; s <= suitSize; s++ {
-		for r := 1; r <= rankSize; r++ {
+	if len(cards) == 0 {
+		for s := 1; s <= suitSize; s++ {
+			for r := 1; r <= rankSize; r++ {
 
-			newCard, err := NewCard(Suit(s), Rank(r))
+				newCard, err := NewCard(Suit(s), Rank(r))
+				if err != nil {
+					return nil, err
+				}
+				d.cards = append(d.cards, newCard)
+			}
+		}
+	} else {
+		for _, card := range cards {
+			newCard, err := CodeToCard(card)
 			if err != nil {
 				return nil, err
 			}

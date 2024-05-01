@@ -63,3 +63,23 @@ func TestDeckGenerationShuffle(t *testing.T) {
 	t.Log("outOfOrder ", outOfOrder, "/", len(cards))
 	require.NotZero(t, outOfOrder)
 }
+
+func TestDeckCustomGeneration(t *testing.T) {
+	newDeck, err := NewDeck(false, "AS")
+	require.NoError(t, err)
+
+	cards := newDeck.Open()
+	require.Len(t, cards, 1)
+	require.Equal(t, SPADES, cards[0].suit)
+	require.Equal(t, ACE, cards[0].rank)
+
+	newDeck, err = NewDeck(false, "AS", "10H")
+	require.NoError(t, err)
+
+	cards = newDeck.Open()
+	require.Len(t, cards, 2)
+	require.Equal(t, SPADES, cards[0].suit)
+	require.Equal(t, ACE, cards[0].rank)
+	require.Equal(t, HEARTS, cards[1].suit)
+	require.Equal(t, TEN, cards[1].rank)
+}
