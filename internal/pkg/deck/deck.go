@@ -1,8 +1,6 @@
 package deck
 
 import (
-	"math/rand"
-
 	"github.com/google/uuid"
 )
 
@@ -12,49 +10,38 @@ type Deck struct {
 	shuffled bool
 }
 
-// NewDeck generates a new deck with all cars, or respecting the parameters
-func NewDeck(shuffled bool, cards ...string) (*Deck, error) {
-
-	d := Deck{
-		ID:       uuid.New(),
-		shuffled: shuffled,
-	}
-
-	if len(cards) == 0 {
-		for s := 1; s <= suitSize; s++ {
-			for r := 1; r <= rankSize; r++ {
-
-				newCard, err := NewCard(Suit(s), Rank(r))
-				if err != nil {
-					return nil, err
-				}
-				d.cards = append(d.cards, newCard)
-			}
-		}
-	} else {
-		for _, card := range cards {
-			newCard, err := CodeToCard(card)
-			if err != nil {
-				return nil, err
-			}
-			d.cards = append(d.cards, newCard)
-		}
-	}
-
-	if shuffled {
-		rand.Shuffle(len(d.cards), func(first, second int) {
-			d.cards[first], d.cards[second] = d.cards[second], d.cards[first]
-		})
-	}
-
-	return &d, nil
+type API interface {
+	Open() []*Card
+	DrawCard(int) []*Card
+	Remaining() int
+	Shuffled() bool
 }
 
 // Open returns all cards from the deck
 func (d *Deck) Open() []*Card {
-	return d.cards
+	// avoid to pass the pointer to the internal array
+	newCardsArray := d.cards
+	return newCardsArray
 }
 
-func (d *Deck) DrawCard() *Card {
-	return &Card{}
+// Remaining returns remaining amount of cards
+func (d *Deck) Remaining() int {
+	return len(d.cards)
+}
+
+// Shuffled returns if deck was shuffled during creation
+func (d *Deck) Shuffled() bool {
+	return d.shuffled
+}
+
+// DrawCard return cards according to requested quantity
+func (d *Deck) DrawCard(quantity int) []*Card {
+	var cards []*Card
+	for i := 0; i < quantity; i++ {
+		var card *Card
+		card, d.cards = d.cards[0], d.cards[1:]
+		cards = append(cards, card)
+	}
+
+	return cards
 }

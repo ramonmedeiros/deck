@@ -5,10 +5,20 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 )
 
-func TestDeckGenerationSize(t *testing.T) {
-	newDeck, err := NewDeck(false)
+type DeckTestSuite struct {
+	suite.Suite
+	deckManager Manager
+}
+
+func (suite *DeckTestSuite) SetupTest() {
+	suite.deckManager = NewManager()
+}
+
+func (suite *DeckTestSuite) TestDeckGenerationSize(t *testing.T) {
+	newDeck, err := suite.deckManager.NewDeck(false)
 	require.NoError(t, err)
 	require.NotNil(t, newDeck.ID)
 	require.NoError(t, uuid.Validate(newDeck.ID.String()))
@@ -17,8 +27,8 @@ func TestDeckGenerationSize(t *testing.T) {
 	require.Len(t, cards, 52)
 }
 
-func TestDeckCheckUnshuffledOrder(t *testing.T) {
-	newDeck, err := NewDeck(false)
+func (suite *DeckTestSuite) TestDeckCheckUnshuffledOrder(t *testing.T) {
+	newDeck, err := suite.deckManager.NewDeck(false)
 	require.NoError(t, err)
 
 	cards := newDeck.Open()
@@ -36,8 +46,8 @@ func TestDeckCheckUnshuffledOrder(t *testing.T) {
 	}
 }
 
-func TestDeckGenerationShuffle(t *testing.T) {
-	newDeck, err := NewDeck(true)
+func (suite *DeckTestSuite) TestDeckGenerationShuffle(t *testing.T) {
+	newDeck, err := suite.deckManager.NewDeck(false)
 	require.NoError(t, err)
 	cards := newDeck.Open()
 
@@ -64,8 +74,8 @@ func TestDeckGenerationShuffle(t *testing.T) {
 	require.NotZero(t, outOfOrder)
 }
 
-func TestDeckCustomGeneration(t *testing.T) {
-	newDeck, err := NewDeck(false, "AS")
+func (suite *DeckTestSuite) TestDeckCustomGeneration(t *testing.T) {
+	newDeck, err := suite.deckManager.NewDeck(false, "AS")
 	require.NoError(t, err)
 
 	cards := newDeck.Open()
@@ -73,7 +83,7 @@ func TestDeckCustomGeneration(t *testing.T) {
 	require.Equal(t, SPADES, cards[0].suit)
 	require.Equal(t, ACE, cards[0].rank)
 
-	newDeck, err = NewDeck(false, "AS", "10H")
+	newDeck, err = suite.deckManager.NewDeck(false, "AS", "10H")
 	require.NoError(t, err)
 
 	cards = newDeck.Open()
@@ -82,4 +92,20 @@ func TestDeckCustomGeneration(t *testing.T) {
 	require.Equal(t, ACE, cards[0].rank)
 	require.Equal(t, HEARTS, cards[1].suit)
 	require.Equal(t, TEN, cards[1].rank)
+}
+
+func (suite *DeckTestSuite) TestDeckDrawCards(t *testing.T) {
+	newDeck, err := suite.deckManager.NewDeck(false)
+	require.NoError(t, err)
+
+	cards := newDeck.Open()
+	require.Len(t, cards, 52)
+
+	cards = newDeck.DrawCard(1)
+	require.Len(t, cards, 1)
+	require.Len(t, newDeck.Open(), 51)
+
+	cards = newDeck.DrawCard(10)
+	require.Len(t, cards, 10)
+	require.Len(t, newDeck.Open(), 41)
 }
